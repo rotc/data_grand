@@ -20,6 +20,7 @@ class BiGRUModel:
         self.is_training = is_training
         self.rnn_state_size = int(model_config['rnn_state_size'])
         self.fc_hidden_size1 = int(model_config['fc_hidden_size1'])
+        self.fc_hidden_size2 = int(model_config['fc_hidden_size2'])
         self.learning_rate = learning_rate
         self.initializer = initializer
 
@@ -28,7 +29,7 @@ class BiGRUModel:
         self.dropout_keep_prob = tf.placeholder(tf.float32, name='dropout_keep_prob')
 
         self.embedding = tf.get_variable('Embedding', shape=[self.vocab_size, \
-                self.embedding_size], trainable=True, initializer=self.initializer)
+                self.embedding_size], trainable=False, initializer=self.initializer)
 
         self.logits = self.inference()
         self.preds_proba = tf.nn.sigmoid(self.logits)
@@ -78,6 +79,7 @@ class BiGRUModel:
         x = tf.nn.relu(tf.layers.batch_normalization(tf.layers.dense(x, self.fc_hidden_size1)))
         if self.is_training:
             x = tf.nn.dropout(x, keep_prob=self.dropout_keep_prob)
+        x = tf.nn.relu(tf.layers.batch_normalization(tf.layers.dense(x, self.fc_hidden_size2)))
 
         logits = tf.layers.dense(x, self.num_classes)
         print('logits shape:', logits.get_shape().as_list())
