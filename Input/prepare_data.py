@@ -48,6 +48,12 @@ if not os.path.isfile(skf_pkl):
     with open(skf_pkl, 'wb') as f:
         cPickle.dump(list_skf, f)
 
+test_ids_npy = '../Input/test_ids.npy'
+if not os.path.isfile(test_ids_npy):
+    df_test = pd.read_pickle(test_pkl)
+    test_ids = df_test['id'].values
+    np.save(test_ids_npy.rsplit('.', 1)[0], test_ids)
+
 # prepare corpus for training word embedding
 corpus_word = '../WordEmbedding/corpus_word'
 corpus_char = '../WordEmbedding/corpus_char'

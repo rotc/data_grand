@@ -8,10 +8,9 @@ import tensorflow as tf
 from tensorflow import keras
 
 class Attention(keras.layers.Layer):
-    def __init__(self, attention_size, initializer=keras.initializers.RandomNormal(stddev=0.1), \
-            **kwargs):
-        self.attention_size = output_dim
-        self.initializer = initializer
+    def __init__(self, attention_size, **kwargs):
+        self.attention_size = attention_size
+        self.initializer = keras.initializers.RandomNormal(stddev=0.1)
         super(Attention, self).__init__(**kwargs)
 
     def build(self, input_shape):
@@ -26,8 +25,8 @@ class Attention(keras.layers.Layer):
         super(Attention, self).build(input_shape)
 
     def call(self, inputs):
-        v = tf.nn.tanh(tf.tensordot(inputs, self.w_omega, axis=1) + self.b_omega)
-        vu = tf.tensordot(v, self.u_omega, axis=1, name='vu')
+        v = tf.nn.tanh(tf.tensordot(inputs, self.w_omega, axes=1) + self.b_omega)
+        vu = tf.tensordot(v, self.u_omega, axes=1, name='vu')
         alpha = tf.nn.softmax(vu, name='alpha')
         output = tf.reduce_sum(tf.multiply(inputs, tf.expand_dims(alpha, -1)), 1)
         return output
@@ -36,7 +35,7 @@ class Attention(keras.layers.Layer):
         return tf.TensorShape(input_shape[0], input_shape[-1])
 
     def get_config(self):
-        base_config = super(MyLayer, self).get_config()
+        base_config = super(Attention, self).get_config()
         base_config['attention_size'] = self.attention_size
         return base_config
 

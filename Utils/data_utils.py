@@ -9,6 +9,7 @@ import pandas as pd
 from torchtext import data
 from tqdm import tqdm
 import tensorflow as tf
+from tensorflow import keras
 from sklearn.metrics import f1_score
 
 def create_vocab(words, vocab_size):
@@ -61,6 +62,30 @@ def do_eval(sess, model, batch_generator, num_example, num_batch):
     eval_score = f1_score(all_labels, all_preds, average='macro')
     return eval_score
 
+#def eval_f1_score
+
+def eval_f1_score(y_true, y_pred):
+    num_classes = 19
+    y_pred = tf.argmax(y_pred, axis=1)
+    y_pred = tf.one_hot(y_pred, num_classes)
+    print(y_true)
+    print(y_pred)
+    TP = tf.count_nonzero(y_pred * y_true, axis = 0)
+    FP = tf.count_nonzero(y_pred * (y_true - 1), axis = 0)
+    FN = tf.count_nonzero((y_pred - 1) * y_true, axis = 0)
+
+    TP_ADD_FP = TP + FP
+    precision = tf.where(tf.equal(TP_ADD_FP, 0), tf.cast(0 * TP_ADD_FP, tf.float64), \
+            tf.divide(TP, TP_ADD_FP))
+
+    TP_ADD_FN = TP + FN
+    recall = tf.where(tf.equal(TP_ADD_FN, 0), tf.cast(0 * TP_ADD_FN, tf.float64), \
+            tf.divide(TP, TP_ADD_FN))
+
+    precision_add_recall = precision + recall
+    f1 = tf.where(tf.equal(precision_add_recall, 0), tf.cast(0 * precision_add_recall, \
+            tf.float64), 2 * precision * recall / precision_add_recall)
+    return f1
 
 class BatchGenerator(object):
     def __init__(self, sequence_length, batch_size, buffer_size):
@@ -77,3 +102,17 @@ class BatchGenerator(object):
             dataset = dataset.batch(self.batch_size).repeat()
         self.iterator = dataset.make_initializable_iterator()
         self.batch = self.iterator.get_next()
+
+class F1Score(keras.callbacks.Callback):
+    def on_train_begin(self, logs={}):
+        self.val_f1s = []
+
+    def on_epoch_end(self, epoch, logs={}):
+        val_preds = self.model.predict(self.validation_data[0])
+        y_pred = np.argmax(val_preds, axis=1)
+        val_labels = self.validation_data[1]
+        y_true = np.argmax(val_labels, axis=1)
+        eval_f1_score = f1_score(y_true, y_pred, average='macro')
+        print('- val_f1_score: {}'.format(eval_f1_score))
+        self.val_f1s.append(eval_f1_score)
+        return
