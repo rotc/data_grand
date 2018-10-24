@@ -61,7 +61,6 @@ for i, (train_idx, valid_idx) in enumerate(skf):
             pretrained_embedding, FLAGS.sequence_length, FLAGS.num_classes, FLAGS.dropout_rate, \
             model_config)
 
-    train_idx, valid_idx = skf[0]
     train_off_sequence, train_off_labels, valid_sequence, valid_labels = train_sequence[train_idx], \
             train_labels[train_idx], train_sequence[valid_idx], train_labels[valid_idx]
     num_train_off, num_valid = train_off_sequence.shape[0], valid_sequence.shape[0]
@@ -99,6 +98,7 @@ for i, (train_idx, valid_idx) in enumerate(skf):
 valid_y_pred = np.argmax(oof_train, axis=1)
 valid_y_true = np.argmax(train_labels, axis=1)
 eval_f1_score = f1_score(valid_y_true, valid_y_pred, average='macro')
+print('oof f1_score:', eval_f1_score)
 ## test prediction
 test_ids_npy = '../Input/test_ids.npy'
 test_ids = np.load(test_ids_npy)

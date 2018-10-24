@@ -32,7 +32,7 @@ class Attention(keras.layers.Layer):
         output = tf.reduce_sum(tf.multiply(inputs, tf.expand_dims(alpha, -1)), 1)
         return output
 
-    def compute_output_shape(tf, input_shape):
+    def compute_output_shape(self, input_shape):
         return tf.TensorShape(input_shape[0], input_shape[-1])
 
     def get_config(self):
